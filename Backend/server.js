@@ -1,10 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config(); // ✅ still good practice
+
+
 import app from "./src/app.js";
 import connectDB from "./src/db/db.js";
 
-import dotenv from "./dotenv.js";
-connectDB()
+connectDB();
 
-
-app.listen(3000,()=>{
-    console.log("The server is running in 3000");    
-})
+app.listen(process.env.PORT || 3000, () => {
+  console.log("The server is running on port 3000");
+});
