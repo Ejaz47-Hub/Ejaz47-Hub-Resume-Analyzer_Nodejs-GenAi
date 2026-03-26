@@ -50,7 +50,7 @@ const interviewReportSchema = z.object({
     })
   ),
 
-  preparationPlan: z.array(
+  preprationPlan: z.array(
     z.object({
       day: z.number(),
       focus: z.string(),
@@ -61,10 +61,21 @@ const interviewReportSchema = z.object({
 
 // ✅ Main function
 async function generateInterviewReport({ resume, selfdescribe, jobdescribe }) {
-  const prompt = `
-Generate a STRICT JSON interview report.
+const prompt = `
+You are an AI that MUST generate a COMPLETE interview report.
 
-RETURN ONLY JSON.
+⚠️ STRICT RULES:
+- DO NOT skip any field
+- DO NOT return empty arrays
+- preparationPlan MUST contain at least 5 days
+- Each day MUST have:
+  - day (number)
+  - focus (string)
+  - tasks (at least 3 tasks)
+
+RETURN ONLY VALID JSON. NO TEXT.
+
+FORMAT:
 
 {
   "matchScore": number,
@@ -88,11 +99,11 @@ RETURN ONLY JSON.
       "severity": "low | medium | high"
     }
   ],
-  "preparationPlan": [
+  "preprationPlan": [
     {
-      "day": number,
+      "day": 1,
       "focus": "string",
-      "tasks": ["string"]
+      "tasks": ["task1", "task2", "task3"]
     }
   ]
 }
@@ -110,6 +121,9 @@ ${jobdescribe}
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
+    generationConfig: {
+    temperature: 0.3, // 🔥 more structured output
+  }
   });
 
   let text = response.text;
@@ -118,7 +132,9 @@ ${jobdescribe}
   text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
   try {
+
     const data = JSON.parse(text);
+
 
     const parsed = interviewReportSchema.safeParse(data);
 

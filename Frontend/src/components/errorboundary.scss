@@ -1,0 +1,125 @@
+.error-boundary-container {
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(
+    135deg,
+    rgba(10, 10, 25, 0.95) 0%,
+    rgba(15, 15, 35, 0.95) 100%
+  );
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.error-boundary-content {
+  background-color: rgba(20, 20, 40, 0.8);
+  border: 2px solid rgba(255, 0, 110, 0.3);
+  border-radius: 1rem;
+  padding: 3rem;
+  max-width: 500px;
+  text-align: center;
+  animation: slideUp 0.5s ease;
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ff006e;
+  margin: 0 0 1rem 0;
+}
+
+.error-message {
+  font-size: 1rem;
+  color: #b0b0c0;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.error-details {
+  background-color: rgba(255, 0, 110, 0.05);
+  border: 1px solid rgba(255, 0, 110, 0.2);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  text-align: left;
+
+  summary {
+    cursor: pointer;
+    color: #ff006e;
+    font-weight: 600;
+    user-select: none;
+  }
+
+  .error-stack {
+    background-color: rgba(10, 10, 25, 0.5);
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+    border-radius: 0.25rem;
+    font-family: "Courier New", monospace;
+    font-size: 0.8rem;
+    color: #b0b0c0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+.error-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #ff006e 0%, #d946ef 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 0, 110, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .error-boundary-content {
+    padding: 2rem;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+  }
+
+  .error-message {
+    font-size: 0.9rem;
+  }
+
+  .error-icon {
+    font-size: 3rem;
+  }
+}
