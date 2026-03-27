@@ -19,5 +19,14 @@ interviewRouter.post("/",authUser,upload.single("resume"),generateInterviewRepor
  */
 interviewRouter.get("/report/:interviewId", authUser,getInerviewReportByIdController)
 
+/**
+ * @route Get/api/interview
+ * @description get all interview reports of logged in user
+ * @access private
+ */
+interviewRouter.get("/",authUser,)
+
+
+
 
 export default interviewRouter

@@ -53,4 +53,17 @@ async function getInerviewReportByIdController(req,res){
     })
 }
 
+/**
+ * @description Controller to get all interview reports of logged in user
+ */
+async function  getAllInterviewReportsController(req,res) {
+    const interviewReports = await interviewReportModel.find({user:req.user.id}).sort({createdAt:-1}).select("-resume -selfDescription -__v -technicalQuestions -behvioralQuestions -skillGaps -preprationPlan ")
+    
+    res.status(200).json({
+        message:"Interview reports fetched successfully",
+        interviewReports
+    })
+}
+
+
 export { generateInterviewReportController, getInerviewReportByIdController}
