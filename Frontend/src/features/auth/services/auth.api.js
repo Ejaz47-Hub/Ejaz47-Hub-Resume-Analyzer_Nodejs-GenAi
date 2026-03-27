@@ -7,17 +7,15 @@ const api =  axios.create({
 })
 
 export async function register({username, email, password}){
-
     try {
-   const response =await api.post('/api/auth/register',{
-        username, email, password
-    })
-    return response.data
+        const response = await api.post('/api/auth/register',{
+            username, email, password
+        })
+        return response.data
     } catch (error) {
-        console.log(error);
-        
+        console.error("Register API error:", error);
+        throw error.response?.data || new Error("Registration failed")
     }
-
 }
 
 export async function login({email,password}){
@@ -29,19 +27,20 @@ export async function login({email,password}){
         })
         return response.data
     } catch (error) {
-        console.log(error);
-        
+        console.error("Login API error:", error);
+        throw error.response?.data || new Error("Login failed")
     }
 }
 
 
 export async function logout(){
     try {
-        const resposne = await api.get('/api/auth/logout')
-        return resposne.data
+        const response = await api.get('/api/auth/logout')
+        return response.data
         
     } catch (error) {
-        console.log(error);
+        console.error("Logout API error:", error);
+        throw error.response?.data || new Error("Logout failed")
     }
 }
 
@@ -50,7 +49,7 @@ export async function getMe(){
         const response = await api.get('/api/auth/get-me')
         return response.data
     } catch (error) {
-        console.log(error);
-        
+        console.error("GetMe API error:", error.message);
+        throw error.response?.data || new Error("Failed to fetch user data")
     }
 }

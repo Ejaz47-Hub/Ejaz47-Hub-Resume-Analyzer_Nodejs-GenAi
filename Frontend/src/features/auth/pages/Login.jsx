@@ -1,18 +1,27 @@
 import React, { useState } from "react";
 import "../auth.form.scss";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router";
 const Login = () => {
-  const { loading, handleLogin } = useAuth();
-  const navigate = useNavigate()
+  const { loading, handleLogin, user } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   await  handleLogin({ email, password });
-   navigate('/')
+    setError("");
+    try {
+      const success = await handleLogin({ email, password });
+      if (success) {
+        navigate("/");
+      } else {
+        setError("Login failed. Please check your credentials.");
+      }
+    } catch (err) {
+      setError(err.message || "Login failed. Please try again.");
+    }
   };
 
   if(loading){
@@ -22,6 +31,7 @@ const Login = () => {
     <main>
       <div className="form-container">
         <h1>Login</h1>
+        {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label htmlFor="email">Email</label>
@@ -33,6 +43,7 @@ const Login = () => {
               id="email"
               name="email"
               placeholder="Enter Email"
+              required
             />
           </div>
 
@@ -46,10 +57,13 @@ const Login = () => {
               id="Password"
               name="Password"
               placeholder="Enter Password"
+              required
             />
           </div>
 
-          <button className="button primary-button">Login</button>
+          <button className="button primary-button" type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
         <p>
           Don't have an account <Link to={"/register"}>Register</Link>

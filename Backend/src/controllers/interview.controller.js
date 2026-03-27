@@ -30,4 +30,27 @@ async function generateInterviewReportController(req,res){
     })
 }
 
-export default generateInterviewReportController
+/**
+ * @description Controller to get interview report By interviewId
+ */
+async function getInerviewReportByIdController(req,res){
+    const {interviewId} = req.params
+
+    const interviewreport = await interviewReportModel.findOne({
+        _id:interviewId,
+        user:req.user.id
+    })
+
+    if(!interviewreport){
+        return res.status(404).json({
+        message:"Interview report not found",
+        })
+    }
+
+    res.status(200).json({
+        message:"Interview report fetched sucessfully",
+        interviewreport
+    })
+}
+
+export { generateInterviewReportController, getInerviewReportByIdController}

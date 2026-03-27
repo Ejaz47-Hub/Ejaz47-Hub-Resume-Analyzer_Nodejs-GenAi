@@ -39,6 +39,32 @@ main{
       color:  #e1034d; 
       text-decoration: none; 
     }
+
+    .error-message {
+        background-color: rgba(255, 77, 77, 0.1);
+        border: 1px solid rgba(255, 77, 77, 0.3);
+        color: #ff4d4d;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideDown 0.3s ease-out;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ✅ Mobile (small screens) */

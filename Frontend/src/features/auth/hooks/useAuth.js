@@ -11,26 +11,34 @@ export const useAuth = () =>{
     setLoading(true)
     try {
         const data = await login({email,password})
-   setUser(data.user)
+        if (data && data.user) {
+            setUser(data.user)
+            return true
+        } else {
+            throw new Error("Login failed - no user data returned")
+        }
     } catch (error) {
-        console.log(error);
-        
+        console.error("Login error:", error);
+        throw error
     }finally{
    setLoading(false)
     }
-    
     }
 
     const handleRegister = async({username,email,password}) =>{
         setLoading(true)
         try {
              const data = await register({username,email,password})
-        setUser(data.user)
+             if (data && data.user) {
+                setUser(data.user)
+                return true
+             } else {
+                throw new Error("Registration failed - no user data returned")
+             }
         } catch (error) {
-            console.log(error);
-            
+            console.error("Register error:", error);
+            throw error
         }finally{
-
         setLoading(false)
         }
        
@@ -40,28 +48,35 @@ export const useAuth = () =>{
         setLoading(true)
         try {
              const data = await logout()
-        setUser(null)
+             setUser(null)
+             return true
         } catch (error) {
-            console.log(error);
-            
+            console.error("Logout error:", error);
+            setUser(null)
+            return false
         }finally{
               setLoading(false)
         }
     }
-        useEffect(()=>{
-        const getAndSetUser = async()=>{
+    
+    useEffect(() => {
+        const getAndSetUser = async () => {
             try {
-                   const data = await getMe()
-            setUser(data.user)
-           
+                const data = await getMe()
+                if (data && data.user) {
+                    setUser(data.user)
+                } else {
+                    setUser(null)
+                }
             } catch (error) {
-                console.log(error);
-            }finally{
-                 setLoading(false)
+                console.log("Not authenticated:", error.message);
+                setUser(null)
+            } finally {
+                setLoading(false)
             }
-         
         }
         getAndSetUser()
-    },[])
-    return {user,loading,handleLogin,handleRegister,handleLogout}
+    }, [])
+
+    return {user, loading, handleLogin, handleRegister, handleLogout}
 }

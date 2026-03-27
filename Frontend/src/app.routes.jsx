@@ -45,6 +45,6 @@ export const router = createBrowserRouter([
         <Interview />
       </Protected>
     ),
-    errorElement: <ErrorBoundary reset={() => (window.location.href = "/")} />,
   },
+  
 ]);
