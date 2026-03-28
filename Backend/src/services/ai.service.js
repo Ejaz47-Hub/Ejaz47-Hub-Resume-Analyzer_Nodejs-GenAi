@@ -57,6 +57,8 @@ const interviewReportSchema = z.object({
       tasks: z.array(z.string()),
     })
   ),
+
+  title:z.string().describe("The title for the job for which the interview report is generated")
 });
 
 // ✅ Main function
