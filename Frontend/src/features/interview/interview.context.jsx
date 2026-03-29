@@ -7,6 +7,7 @@ export const InterviewContext = createContext();
 export const InterviewProvider = ({ children }) => {
     const [interviewReport, setInterviewReport] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [reports, setReports] = useState([])
 
     return (
         <InterviewContext.Provider
@@ -14,7 +15,7 @@ export const InterviewProvider = ({ children }) => {
                 interviewReport,
                 setInterviewReport,
                 loading,
-                setLoading
+                setLoading,reports,setReports
             }}
         >
             {children}

@@ -1,7 +1,48 @@
-import React from "react";
+import React,{useState,useRef} from "react";
 import "../style/home.scss";
+import { useInterview } from "../../auth/hooks/useInterview.js";
+import { useNavigate } from "react-router";
 
 const Home = () => {
+  const {loading,generateReport} = useInterview()
+  const [jobDescription, setJobDescription] = useState("")
+  const [selfDescription, setSelfDescription] = useState()
+  const resumeInputRef = useRef()
+  const navigate = useNavigate()
+
+ const handleGenerateReport = async () => {
+  try {
+    const resumeFile = resumeInputRef.current.files[0];
+
+    const data = await generateReport({
+      jobDescription,
+      selfDescription,
+      resumeFile
+    });
+
+    // 🚨 IMPORTANT CHECK
+    if (!data || !data._id) {
+      console.error("Invalid response from backend:", data);
+      alert("Something went wrong. Please try again.");
+      return;
+    }
+
+    navigate(`/interview/${data._id}`);
+
+  } catch (error) {
+    console.error("Error generating report:", error);
+    alert("Server error. Check backend.");
+  }
+};
+  if(loading){
+    return (
+      <main className="loading-screen">
+        <h1>Loading your interview plan...</h1>
+      </main>
+    )
+  }
+
+
   return (
     <main className="home">
       <div className="container">
@@ -27,6 +68,7 @@ const Home = () => {
               <span className="required-badge">Required</span>
             </div>
             <textarea
+            onChange={(e)=>setJobDescription(e.target.value)}
               name="jobDescription"
               id="jobDescription"
               placeholder='Paste the full job description here... e.g. "Senior Frontend Engineer at Google requires proficiency in React, TypeScript and large-scale system design."'
@@ -54,6 +96,7 @@ const Home = () => {
                 </label>
                 <input
                   hidden
+                  ref={resumeInputRef}
                   type="file"
                   name="resume"
                   id="resume"
@@ -79,6 +122,7 @@ const Home = () => {
               </label>
               <textarea
                 name="selfDescription"
+                onChange={(e)=>{setSelfDescription(e.target.value)}}
                 id="selfDescription"
                 placeholder="Briefly describe your experience, key skills, and years of experience. If you don't have a resume handy..."
                 className="self-description-textarea"
@@ -99,7 +143,9 @@ const Home = () => {
             </div>
 
             {/* Generate Button */}
-            <button className="generate-btn">
+            <button 
+            onClick={handleGenerateReport}
+            className="generate-btn">
               <span className="btn-icon">✨</span>
               Generate My Interview Strategy
             </button>

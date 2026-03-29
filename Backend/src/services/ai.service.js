@@ -62,7 +62,7 @@ const interviewReportSchema = z.object({
 });
 
 // ✅ Main function
-async function generateInterviewReport({ resume, selfdescribe, jobdescribe }) {
+async function generateInterviewReport({ resume, selfdescription, jobdescription }) {
 const prompt = `
 You are an AI that MUST generate a COMPLETE interview report.
 
@@ -75,7 +75,7 @@ You are an AI that MUST generate a COMPLETE interview report.
   - focus (string)
   - tasks (at least 3 tasks)
 
-RETURN ONLY VALID JSON. NO TEXT.
+Return ONLY valid JSON. Do not include any explanation or text.
 
 FORMAT:
 
@@ -114,10 +114,10 @@ Candidate Resume:
 ${resume}
 
 Self Description:
-${selfdescribe}
+${selfdescription}
 
 Job Description:
-${jobdescribe}
+${jobdescription}
 `;
 
   const response = await ai.models.generateContent({
@@ -128,14 +128,14 @@ ${jobdescribe}
   }
   });
 
-  let text = response.text;
+   let text = response.text;
 
   // ✅ Clean JSON if wrapped
   text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
   try {
-
-    const data = JSON.parse(text);
+   console.log("Raw AI Response:", text);  // Add this line
+  const data = JSON.parse(text)
 
 
     const parsed = interviewReportSchema.safeParse(data);

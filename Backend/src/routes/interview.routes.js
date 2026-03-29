@@ -1,7 +1,7 @@
 import express from "express";
 import authUser from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/file.middleware.js";
-import generateInterviewReportController, { getInerviewReportByIdController } from "../controllers/interview.controller.js";
+import { generateInterviewReportController,getAllInterviewReportsController,getInerviewReportByIdController } from "../controllers/interview.controller.js"; 
 
 const interviewRouter = express.Router()
 
@@ -24,7 +24,7 @@ interviewRouter.get("/report/:interviewId", authUser,getInerviewReportByIdContro
  * @description get all interview reports of logged in user
  * @access private
  */
-interviewRouter.get("/",authUser,)
+interviewRouter.get("/",authUser,getAllInterviewReportsController)
 
 
 
