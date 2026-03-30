@@ -1,0 +1,54 @@
+.button{
+    border: none;
+    outline: none;
+    padding-inline: 1.5rem;
+    padding-block: 0.75rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+
+    &.primary-button{
+        background-color: #e1034d;
+    }
+
+    &.active{
+        transform: scale(1.1);
+    }
+}
+
+/* ✅ Small Devices (Mobiles) */
+@media (max-width: 480px) {
+    .button{
+        padding-inline: 1.2rem;
+        padding-block: 0.65rem;
+        font-size: 0.85rem;
+        border-radius: 0.8rem;
+    }
+}
+
+/* ✅ Tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+    .button{
+        padding-inline: 1.3rem;
+        padding-block: 0.7rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* ✅ Laptops */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .button{
+        padding-inline: 1.5rem;
+        padding-block: 0.75rem;
+        font-size: 1rem;
+    }
+}
+
+/* ✅ Desktops */
+@media (min-width: 1025px) {
+    .button{
+        padding-inline: 1.7rem;
+        padding-block: 0.85rem;
+        font-size: 1.05rem;
+    }
+}

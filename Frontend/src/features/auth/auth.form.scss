@@ -1,0 +1,116 @@
+main{
+    min-height: 100vh;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem; // ✅ prevents edge touching on small screens
+
+    .form-container{
+        min-width: 350px;
+        display: flex;
+        flex-direction: column;
+        gap:1rem ;
+    }
+
+    form{
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .input-group{
+       display: flex;
+       flex-direction: column; 
+       gap: 0.5rem;
+
+       input{
+        border: none;
+        outline: none;
+        padding-inline: 1rem ;
+        padding-block: 0.75rem;
+        border-radius: 0.75rem;
+        width: 100%; // ✅ ensures proper scaling
+       }
+    }
+
+    a{
+      color:  #e1034d; 
+      text-decoration: none; 
+    }
+
+    .error-message {
+        background-color: rgba(255, 77, 77, 0.1);
+        border: 1px solid rgba(255, 77, 77, 0.3);
+        color: #ff4d4d;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideDown 0.3s ease-out;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ✅ Mobile (small screens) */
+@media (max-width: 480px) {
+    main{
+        align-items: flex-start; // better for scrolling forms
+        padding-top: 2rem;
+
+        .form-container{
+            min-width: 100%; // full width on mobile
+        }
+
+        .input-group input{
+            font-size: 0.9rem;
+            padding-block: 0.65rem;
+        }
+    }
+}
+
+/* ✅ Tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+    main{
+        .form-container{
+            min-width: 300px;
+            max-width: 400px;
+            width: 100%;
+        }
+    }
+}
+
+/* ✅ Laptops */
+@media (min-width: 769px) and (max-width: 1024px) {
+    main{
+        .form-container{
+            min-width: 350px;
+            max-width: 420px;
+        }
+    }
+}
+
+/* ✅ Desktops */
+@media (min-width: 1025px) {
+    main{
+        .form-container{
+            min-width: 350px;
+            max-width: 450px; // ✅ cleaner centered layout
+        }
+    }
+}
