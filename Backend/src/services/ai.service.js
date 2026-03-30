@@ -1,13 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 
 // ✅ Initialize AI
-const ai = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // ✅ Schema
 const interviewReportSchema = z.object({
@@ -85,15 +84,16 @@ ${jobDescription}
 `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      generationConfig: {
-        temperature: 0.3,
-      },
-    });
+    console.log("🚀 Starting AI response generation...");
+    console.log("🔑 API KEY EXISTS:", !!process.env.GOOGLE_API_KEY);
+    console.log("📝 PROMPT LENGTH:", prompt.length);
 
-    let text = response.text;
+    const response = await model.generateContent(prompt);
+
+    let text = response.response.text();
+
+    console.log("✅ AI API responded successfully");
+    console.log("🔍 RAW AI RESPONSE:", text);
 
     // ✅ Clean markdown if exists
     text = text
@@ -101,17 +101,19 @@ ${jobDescription}
       .replace(/```/g, "")
       .trim();
 
-    console.log("🔍 RAW AI RESPONSE:", text);
+    console.log("🧹 CLEANED RESPONSE:", text);
 
     // ✅ Extract valid JSON safely
     const firstBrace = text.indexOf("{");
     const lastBrace = text.lastIndexOf("}");
 
     if (firstBrace === -1 || lastBrace === -1) {
+      console.error("❌ NO JSON FOUND IN RESPONSE");
       throw new Error("Invalid JSON structure from AI");
     }
 
     const cleanJson = text.slice(firstBrace, lastBrace + 1);
+    console.log("📦 EXTRACTED JSON:", cleanJson);
 
     const data = JSON.parse(cleanJson);
 
@@ -119,13 +121,22 @@ ${jobDescription}
     const parsed = interviewReportSchema.safeParse(data);
 
     if (!parsed.success) {
-      console.error("❌ ZOD ERROR:", parsed.error);
+      console.error("❌ ZOD VALIDATION ERROR:", parsed.error.errors);
       throw new Error("Invalid AI response format");
     }
 
     return parsed.data;
   } catch (error) {
     console.error("❌ AI ERROR:", error.message);
+    console.error("📋 ERROR DETAILS:", error);
+    if (error.response) {
+      console.error("🌐 API RESPONSE STATUS:", error.response.status);
+      console.error(
+        "🌐 API RESPONSE DATA:",
+        error.response.data || error.response
+      );
+    }
+    console.error("💥 FULL STACK:", error.stack);
 
     // ✅ Fallback (prevents 500 crash)
     return {
@@ -182,4 +193,87 @@ ${jobDescription}
   }
 }
 
-export { generateInterviewReport };
+async function generateTailoredResume({
+  resume,
+  jobDescription,
+  selfDescription,
+}) {
+  const prompt = `
+You are an expert resume writer. Based on the candidate's resume, self description, and the target job description, 
+create a TAILORED resume that highlights the most relevant skills and experiences for this specific job.
+
+IMPORTANT RULES:
+- Keep professional resume format
+- Highlight skills matching the job requirements
+- Reorganize bullet points to emphasize relevant experience
+- Use action verbs
+- Include quantifiable achievements when possible
+- Return ONLY the resume content (no headers, labels, or extra text)
+
+CANDIDATE RESUME:
+${resume}
+
+CANDIDATE SELF DESCRIPTION:
+${selfDescription}
+
+TARGET JOB DESCRIPTION:
+${jobDescription}
+
+TAILORED RESUME:
+`;
+
+  try {
+    console.log("🚀 Starting Tailored Resume generation...");
+    const response = await model.generateContent(prompt);
+
+    let resumeContent = response.response.text();
+
+    // Clean up markdown if present
+    resumeContent = resumeContent
+      .replace(/```markdown/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    console.log("✅ Tailored Resume Generated Successfully");
+    console.log("📄 RESUME CONTENT LENGTH:", resumeContent.length);
+    return resumeContent;
+  } catch (error) {
+    console.error("❌ Resume Generation ERROR:", error.message);
+    console.error("📋 ERROR DETAILS:", error);
+    console.error("💥 FULL STACK:", error.stack);
+
+    // Fallback resume if AI fails
+    return `
+PROFESSIONAL RESUME
+===================
+
+${selfDescription || "Professional seeking a challenging position"}
+
+PROFESSIONAL SUMMARY
+--------------------
+Experienced professional with strong background in various technical and soft skills.
+
+EXPERIENCE
+----------
+${
+  resume
+    ? "Based on provided resume: " + resume.substring(0, 500)
+    : "Detailed experience available upon request"
+}
+
+SKILLS
+------
+Technical Skills, Problem Solving, Communication, Project Management
+
+EDUCATION
+---------
+Professional qualifications and continuous learning
+
+OBJECTIVE
+---------
+Seeking a position that leverages my skills and experience in the target role.
+    `;
+  }
+}
+
+export { generateInterviewReport, generateTailoredResume };

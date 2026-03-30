@@ -16,7 +16,10 @@ try {
   }
 }
 
-import { generateInterviewReport } from "../services/ai.service.js";
+import {
+  generateInterviewReport,
+  generateTailoredResume,
+} from "../services/ai.service.js";
 import interviewReportModel from "../models/interviewReport.model.js";
 
 // ✅ Generate Interview Report
@@ -212,7 +215,7 @@ ${day.tasks.map((task) => `  - ${task}`).join("\n")}
     `;
 
     // Send as downloadable file
-    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="interview-report-${interviewId}.txt"`
@@ -228,10 +231,60 @@ ${day.tasks.map((task) => `  - ${task}`).join("\n")}
   }
 }
 
+// ✅ Generate Tailored Resume
+async function generateTailoredResumeController(req, res) {
+  try {
+    const { interviewId } = req.params;
+
+    console.log("📥 Fetching interview report:", interviewId);
+
+    const interviewReport = await interviewReportModel.findOne({
+      _id: interviewId,
+      user: req.user.id,
+    });
+
+    if (!interviewReport) {
+      console.error("❌ Interview report not found:", interviewId);
+      return res.status(404).json({
+        message: "Interview report not found",
+      });
+    }
+
+    console.log("✅ Interview report found, generating tailored resume...");
+
+    // Generate tailored resume using AI
+    const tailoredResume = await generateTailoredResume({
+      resume: interviewReport.resume,
+      jobDescription: interviewReport.jobDescription,
+      selfDescription: interviewReport.selfDescription,
+    });
+
+    console.log("✅ Tailored resume generated, sending to client...");
+    console.log("📄 Resume length:", tailoredResume.length);
+
+    // Send as downloadable resume file
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="tailored-resume-${interviewId}.txt"`
+    );
+    res.send(tailoredResume);
+  } catch (error) {
+    console.error("❌ Tailored Resume Generation ERROR:", error.message);
+    console.error("💥 STACK:", error.stack);
+
+    res.status(500).json({
+      message: "Failed to generate tailored resume",
+      error: error.message,
+    });
+  }
+}
+
 // ✅ EXPORTS
 export {
   generateInterviewReportController,
   getInerviewReportByIdController,
   getAllInterviewReportsController,
   generateResumePdfController,
+  generateTailoredResumeController,
 };

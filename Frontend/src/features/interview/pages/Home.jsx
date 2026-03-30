@@ -4,7 +4,7 @@ import { useInterview } from "../../auth/hooks/useInterview.js";
 import { useNavigate } from "react-router";
 
 const Home = () => {
-  const {loading,generateReport} = useInterview()
+  const {loading,generateReport,reports} = useInterview()
   const [jobDescription, setJobDescription] = useState("")
   const [selfDescription, setSelfDescription] = useState()
   const resumeInputRef = useRef()
@@ -151,6 +151,25 @@ const Home = () => {
             </button>
           </div>
         </div>
+
+
+        {
+          reports.length > 0 && (
+            <section className="recent-reports">
+              <h2 className="section-title">Your Recent Interview Plans</h2>
+              <div className="reports-list">
+                {reports.slice(0, 3).map((report) => (
+                  <div 
+                  onClick={()=>navigate(`/interview/${report._id}`)}
+                  key={report._id} className="report-card">
+                    <h3 className="report-title">{report.title}</h3>
+                    <p className="report-date">{new Date(report.createdAt).toLocaleDateString()}</p>
+                    <p className="match-score">Match Score: {report.matchScore}%</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+        )}
 
         {/* Footer Note */}
         <p className="footer-note">

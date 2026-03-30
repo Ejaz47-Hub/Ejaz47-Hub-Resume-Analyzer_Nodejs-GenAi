@@ -6,6 +6,7 @@ import {
   getAllInterviewReportsController,
   getInerviewReportByIdController,
   generateResumePdfController,
+  generateTailoredResumeController,
 } from "../controllers/interview.controller.js";
 
 const interviewRouter = express.Router();
@@ -31,6 +32,17 @@ interviewRouter.post(
   "/resume/pdf/:interviewId",
   authUser,
   generateResumePdfController
+);
+
+/**
+ *  @route Post /api/interview/resume/tailored/:interviewId
+ * @description generate AI-tailored resume for the target job
+ * @access private
+ */
+interviewRouter.post(
+  "/resume/tailored/:interviewId",
+  authUser,
+  generateTailoredResumeController
 );
 
 /**
