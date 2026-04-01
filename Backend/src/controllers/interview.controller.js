@@ -16,6 +16,7 @@ try {
   }
 }
 
+import PDFDocument from "pdfkit";
 import {
   generateInterviewReport,
   generateTailoredResume,
@@ -163,64 +164,133 @@ async function generateResumePdfController(req, res) {
       });
     }
 
-    // Generate PDF content as text/plain for now
-    const pdfContent = `
-INTERVIEW PREPARATION REPORT
-==============================
+    // Create a new PDF document
+    const doc = new PDFDocument({
+      margin: 50,
+      size: "A4",
+    });
 
-Title: ${interviewReport.title}
-Match Score: ${interviewReport.matchScore}/100
-
-TECHNICAL QUESTIONS
--------------------
-${interviewReport.technicalQuestions
-  .map(
-    (q, i) => `
-Q${i + 1}: ${q.question}
-Intention: ${q.intention}
-Answer: ${q.answer}
-`
-  )
-  .join("\n")}
-
-BEHAVIORAL QUESTIONS
---------------------
-${interviewReport.behavioralQuestions
-  .map(
-    (q, i) => `
-Q${i + 1}: ${q.question}
-Intention: ${q.intention}
-Answer: ${q.answer}
-`
-  )
-  .join("\n")}
-
-SKILL GAPS
-----------
-${interviewReport.skillGaps
-  .map((gap) => `• ${gap.skill} (${gap.severity})`)
-  .join("\n")}
-
-PREPARATION PLAN
-----------------
-${interviewReport.preparationPlan
-  .map(
-    (day) => `
-Day ${day.day}: ${day.focus}
-Tasks:
-${day.tasks.map((task) => `  - ${task}`).join("\n")}
-`
-  )
-  .join("\n")}
-    `;
-
-    // Send as downloadable file
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    // Set response headers
+    res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="interview-report-${interviewId}.txt"`
+      `attachment; filename="interview-report-${interviewId}.pdf"`
     );
-    res.send(pdfContent);
+
+    // Pipe the PDF to the response
+    doc.pipe(res);
+
+    // Title
+    doc
+      .fontSize(24)
+      .font("Helvetica-Bold")
+      .text("INTERVIEW PREPARATION REPORT", {
+        align: "center",
+      });
+
+    doc.moveDown(0.5);
+    doc.fontSize(12).font("Helvetica").text(`Report ID: ${interviewId}`, {
+      align: "center",
+    });
+    doc.fontSize(12).text(`Generated: ${new Date().toLocaleDateString()}`, {
+      align: "center",
+    });
+
+    doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+    doc.moveDown(1);
+
+    // Match Score
+    doc.fontSize(14).font("Helvetica-Bold").text("Match Score");
+    doc
+      .fontSize(20)
+      .font("Helvetica-Bold")
+      .fillColor("#ff006e")
+      .text(`${interviewReport.matchScore}%`);
+    doc.fillColor("black");
+    doc.moveDown(1);
+
+    // Technical Questions
+    doc.fontSize(14).font("Helvetica-Bold").text("Technical Questions");
+    doc.moveDown(0.5);
+
+    interviewReport.technicalQuestions.forEach((q, i) => {
+      doc
+        .fontSize(11)
+        .font("Helvetica-Bold")
+        .text(`Q${i + 1}: ${q.question}`);
+      doc
+        .fontSize(10)
+        .font("Helvetica")
+        .fillColor("#666666")
+        .text(`Intention: ${q.intention}`);
+      doc.text(`Answer: ${q.answer}`);
+      doc.fillColor("black");
+      doc.moveDown(0.5);
+    });
+
+    doc.moveDown(1);
+
+    // Behavioral Questions
+    doc.fontSize(14).font("Helvetica-Bold").text("Behavioral Questions");
+    doc.moveDown(0.5);
+
+    interviewReport.behavioralQuestions.forEach((q, i) => {
+      doc
+        .fontSize(11)
+        .font("Helvetica-Bold")
+        .text(`Q${i + 1}: ${q.question}`);
+      doc
+        .fontSize(10)
+        .font("Helvetica")
+        .fillColor("#666666")
+        .text(`Intention: ${q.intention}`);
+      doc.text(`Answer: ${q.answer}`);
+      doc.fillColor("black");
+      doc.moveDown(0.5);
+    });
+
+    doc.moveDown(1);
+
+    // Skill Gaps
+    doc.fontSize(14).font("Helvetica-Bold").text("Skill Gaps");
+    doc.moveDown(0.5);
+
+    interviewReport.skillGaps.forEach((gap) => {
+      const severityColor =
+        gap.severity === "high"
+          ? "#ff4d4d"
+          : gap.severity === "medium"
+          ? "#f5a623"
+          : "#3fb950";
+      doc
+        .fontSize(10)
+        .font("Helvetica")
+        .fillColor(severityColor)
+        .text(`• ${gap.skill} (${gap.severity})`);
+    });
+
+    doc.fillColor("black");
+    doc.moveDown(1);
+
+    // Preparation Plan
+    doc.fontSize(14).font("Helvetica-Bold").text("Preparation Road Map");
+    doc.moveDown(0.5);
+
+    interviewReport.preparationPlan.forEach((day) => {
+      doc
+        .fontSize(11)
+        .font("Helvetica-Bold")
+        .text(`Day ${day.day}: ${day.focus}`);
+      doc.fontSize(10).font("Helvetica").fillColor("#666666");
+      day.tasks.forEach((task) => {
+        doc.text(`  • ${task}`);
+      });
+      doc.fillColor("black");
+      doc.moveDown(0.5);
+    });
+
+    // Finalize PDF
+    doc.end();
   } catch (error) {
     console.error("PDF Generation ERROR:", error);
 
@@ -260,7 +330,6 @@ async function generateTailoredResumeController(req, res) {
     });
 
     console.log("✅ Tailored resume generated, sending to client...");
-    console.log("📄 Resume length:", tailoredResume.length);
 
     // Send as downloadable resume file
     res.setHeader("Content-Type", "text/plain; charset=utf-8");

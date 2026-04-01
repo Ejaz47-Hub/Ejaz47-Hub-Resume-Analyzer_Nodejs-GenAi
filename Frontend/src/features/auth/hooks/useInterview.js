@@ -87,13 +87,13 @@ export const useInterview = () => {
       }
 
       const url = window.URL.createObjectURL(
-        new Blob([response], { type: "text/plain" })
+        new Blob([response], { type: "application/pdf" })
       );
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
         "download",
-        `interview-report-${interviewReportId}.txt`
+        `interview-report-${interviewReportId}.pdf`
       );
       document.body.appendChild(link);
       link.click();

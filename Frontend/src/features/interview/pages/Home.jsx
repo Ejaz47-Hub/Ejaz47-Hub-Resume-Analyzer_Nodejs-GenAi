@@ -1,50 +1,78 @@
-import React,{useState,useRef} from "react";
+import React, { useState, useRef } from "react";
 import "../style/home.scss";
 import { useInterview } from "../../auth/hooks/useInterview.js";
+import { useAuth } from "../../auth/hooks/useAuth.js";
 import { useNavigate } from "react-router";
 
 const Home = () => {
-  const {loading,generateReport,reports} = useInterview()
-  const [jobDescription, setJobDescription] = useState("")
-  const [selfDescription, setSelfDescription] = useState()
-  const resumeInputRef = useRef()
-  const navigate = useNavigate()
+  const { loading, generateReport, reports } = useInterview();
+  const { user, handleLogout, loading: authLoading } = useAuth();
+  const [jobDescription, setJobDescription] = useState("");
+  const [selfDescription, setSelfDescription] = useState();
+  const resumeInputRef = useRef();
+  const navigate = useNavigate();
 
- const handleGenerateReport = async () => {
-  try {
-    const resumeFile = resumeInputRef.current.files[0];
-
-    const data = await generateReport({
-      jobDescription,
-      selfDescription,
-      resumeFile
-    });
-
-    // 🚨 IMPORTANT CHECK
-    if (!data || !data._id) {
-      console.error("Invalid response from backend:", data);
-      alert("Something went wrong. Please try again.");
-      return;
+  const handleLogoutClick = async () => {
+    const success = await handleLogout();
+    if (success) {
+      navigate("/login");
     }
+  };
 
-    navigate(`/interview/${data._id}`);
+  const handleGenerateReport = async () => {
+    try {
+      const resumeFile = resumeInputRef.current.files[0];
 
-  } catch (error) {
-    console.error("Error generating report:", error);
-    alert("Server error. Check backend.");
-  }
-};
-  if(loading){
+      const data = await generateReport({
+        jobDescription,
+        selfDescription,
+        resumeFile,
+      });
+
+      // 🚨 IMPORTANT CHECK
+      if (!data || !data._id) {
+        console.error("Invalid response from backend:", data);
+        alert("Something went wrong. Please try again.");
+        return;
+      }
+
+      navigate(`/interview/${data._id}`);
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert("Server error. Check backend.");
+    }
+  };
+  if (loading) {
     return (
       <main className="loading-screen">
         <h1>Loading your interview plan...</h1>
       </main>
-    )
+    );
   }
-
 
   return (
     <main className="home">
+      {/* Header with Logout Button */}
+      <header className="home-header">
+        <div className="header-content">
+          <h2 className="app-logo">🎯 Resume Analyzer</h2>
+          <div className="header-actions">
+            {user && (
+              <>
+                <span className="user-info">Welcome, {user.username}!</span>
+                <button
+                  onClick={handleLogoutClick}
+                  disabled={authLoading}
+                  className="logout-btn"
+                >
+                  {authLoading ? "Logging out..." : "Logout"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
       <div className="container">
         {/* Header Section */}
         <div className="header-section">
@@ -68,7 +96,7 @@ const Home = () => {
               <span className="required-badge">Required</span>
             </div>
             <textarea
-            onChange={(e)=>setJobDescription(e.target.value)}
+              onChange={(e) => setJobDescription(e.target.value)}
               name="jobDescription"
               id="jobDescription"
               placeholder='Paste the full job description here... e.g. "Senior Frontend Engineer at Google requires proficiency in React, TypeScript and large-scale system design."'
@@ -122,7 +150,9 @@ const Home = () => {
               </label>
               <textarea
                 name="selfDescription"
-                onChange={(e)=>{setSelfDescription(e.target.value)}}
+                onChange={(e) => {
+                  setSelfDescription(e.target.value);
+                }}
                 id="selfDescription"
                 placeholder="Briefly describe your experience, key skills, and years of experience. If you don't have a resume handy..."
                 className="self-description-textarea"
@@ -143,32 +173,34 @@ const Home = () => {
             </div>
 
             {/* Generate Button */}
-            <button 
-            onClick={handleGenerateReport}
-            className="generate-btn">
+            <button onClick={handleGenerateReport} className="generate-btn">
               <span className="btn-icon">✨</span>
               Generate My Interview Strategy
             </button>
           </div>
         </div>
 
-
-        {
-          reports.length > 0 && (
-            <section className="recent-reports">
-              <h2 className="section-title">Your Recent Interview Plans</h2>
-              <div className="reports-list">
-                {reports.slice(0, 3).map((report) => (
-                  <div 
-                  onClick={()=>navigate(`/interview/${report._id}`)}
-                  key={report._id} className="report-card">
-                    <h3 className="report-title">{report.title}</h3>
-                    <p className="report-date">{new Date(report.createdAt).toLocaleDateString()}</p>
-                    <p className="match-score">Match Score: {report.matchScore}%</p>
-                  </div>
-                ))}
-              </div>
-            </section>
+        {reports.length > 0 && (
+          <section className="recent-reports">
+            <h2 className="section-title">Your Recent Interview Plans</h2>
+            <div className="reports-list">
+              {reports.slice(0, 3).map((report) => (
+                <div
+                  onClick={() => navigate(`/interview/${report._id}`)}
+                  key={report._id}
+                  className="report-card"
+                >
+                  <h3 className="report-title">{report.title}</h3>
+                  <p className="report-date">
+                    {new Date(report.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="match-score">
+                    Match Score: {report.matchScore}%
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* Footer Note */}
