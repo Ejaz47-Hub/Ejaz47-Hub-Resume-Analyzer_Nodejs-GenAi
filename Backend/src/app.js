@@ -20,6 +20,12 @@ app.use(cors({
 }))
 
 // using all the routes here
+app.use('/',(req,res)=>{
+    res.send({
+        activeStatus:true,
+        error:false
+    })
+})
 app.use('/api/auth',authRouter)
 app.use('/api/interview',interviewRouter)
 
