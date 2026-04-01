@@ -2,3 +2,6 @@
   base = "Frontend"
   publish = "dist"
   command = "npm run build"
+
+[build.environment]
+  VITE_API_URL = "https://ejaz47-hub-resume-analyzer-nodejs-g.vercel.app"
