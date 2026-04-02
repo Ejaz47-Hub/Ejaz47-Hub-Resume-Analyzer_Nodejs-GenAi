@@ -20,9 +20,6 @@ async function registerUserController(req, res) {
       $or: [{ username }, { email }],
     });
     if (isUserAlreadyExists) {
-      /**
-       * isUserAlreadyExists.username == username
-       */
       return res.status(400).json({ message: "User alredy exists" });
     }
 
@@ -40,10 +37,16 @@ async function registerUserController(req, res) {
       { expiresIn: "1d" }
     );
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     res.status(201).json({
       message: "User Created Successfully",
+      token, // FIXED: return token in response body
       user: {
         id: user._id,
         username: username,
@@ -83,9 +86,17 @@ async function loginUserController(req, res) {
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
-    res.cookie("token", token);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     res.status(200).json({
       message: "User LoggedIn sucessfully",
+      token, // FIXED: return token in response body
       user: {
         id: user._id,
         username: user.username,
@@ -105,7 +116,7 @@ async function loginUserController(req, res) {
  */
 async function logoutUserController(req, res) {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
     if (token) {
       await tokenBlacklistModel.create({ token });
     }
@@ -128,8 +139,6 @@ async function logoutUserController(req, res) {
 async function getMeController(req, res) {
   try {
     const user = await userModel.findById(req.user.id);
-    // console.log("req.user:", req.user);
-    // console.log("req.user.id:", req.user?.id);
 
     res.status(200).json({
       message: "user Detailed fetched successfully",
