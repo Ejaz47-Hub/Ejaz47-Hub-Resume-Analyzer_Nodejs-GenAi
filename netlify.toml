@@ -4,4 +4,4 @@
   command = "npm run build"
 
 [build.environment]
-  VITE_API_URL = "https://ejaz47-hub-resume-analyzer-nodejs-g.vercel.app"
+  VITE_API_URL = "https://ejaz47-hub-resume-analyzer-nodejs-genai.onrender.com"
